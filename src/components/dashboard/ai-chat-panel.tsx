@@ -22,7 +22,12 @@ export function AiChatPanel() {
     const history = recentMessages.slice(firstUserIndex)
     setMessages(next); setInput(''); setError(''); setLoading(true)
     try {
-      const response = await fetch('/api/ai/chat', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ messages: history }) })
+      const apiUrl = import.meta.env.VITE_API_URL ?? ''
+      const response = await fetch(`${apiUrl}/api/ai/chat`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+       body: JSON.stringify({ messages: history }),
+})
       const data = await response.json() as { message?: string; error?: string; sources?: AiSource[] }
       if (!response.ok) throw new Error(data.error ?? 'Không thể kết nối AI.')
       setMessages((current) => [...current, { role: 'assistant', content: data.message ?? 'AI chưa trả lời.', sources: data.sources }])

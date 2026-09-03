@@ -1,7 +1,7 @@
 import { createServer } from 'node:http'
 import { chatWithDormitoryAssistant } from './ai.ts'
 
-const port = Number(process.env.AI_PORT ?? 8787)
+const port = Number(process.env.PORT ?? process.env.AI_PORT ?? 8787)
 const maxBodySize = 32_000
 
 function sendJson(response: import('node:http').ServerResponse, status: number, body: unknown) {
@@ -19,13 +19,50 @@ async function readBody(request: import('node:http').IncomingMessage) {
 }
 
 const server = createServer(async (request, response) => {
-  if (request.method === 'GET' && request.url === '/health') { sendJson(response, 200, { status: 'ok', service: 'dormitory-ai' }); return }
-  if (request.method === 'POST' && request.url === '/api/ai/chat') {
-    try { sendJson(response, 200, await chatWithDormitoryAssistant(await readBody(request))) }
-    catch (error) { const message = error instanceof Error ? error.message : 'AI service error'; const status = message.includes('ANTHROPIC_API_KEY') ? 503 : 400; sendJson(response, status, { error: message }) }
+  response.setHeader('Access-Control-Allow-Origin', '*')
+  response.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+  response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+
+  if (request.method === 'OPTIONS') {
+    response.writeHead(204)
+    response.end()
     return
   }
-  sendJson(response, 404, { error: 'Không tìm thấy endpoint.' })
+
+  if (request.method === 'GET' && request.url === '/health') {
+    sendJson(response, 200, {
+      status: 'ok',
+      service: 'dormitory-ai'
+    })
+    return
+  }
+
+  if (request.method === 'POST' && request.url === '/api/ai/chat') {
+    try {
+      sendJson(
+        response,
+        200,
+        await chatWithDormitoryAssistant(await readBody(request))
+      )
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'AI service error'
+
+      const status = message.includes('ANTHROPIC_API_KEY')
+        ? 503
+        : 400
+
+      sendJson(response, status, { error: message })
+    }
+
+    return
+  }
+
+  sendJson(response, 404, {
+    error: 'Không tìm thấy endpoint.'
+  })
 })
 
-server.listen(port, '127.0.0.1', () => console.log(`AI backend listening on http://127.0.0.1:${port}`))
+server.listen(port, '0.0.0.0', () => console.log(`AI backend listening on port ${port}`))
