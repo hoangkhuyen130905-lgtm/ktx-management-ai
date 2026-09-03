@@ -1,0 +1,18 @@
+import { useEffect, useMemo, useState } from 'react'
+import { FileText, RefreshCw } from 'lucide-react'
+import { PageHeader } from '../../components/layout/page-header'
+import { Card, CardContent } from '../../components/ui/card'
+import { Button } from '../../components/ui/button'
+import { StatusBadge } from '../../components/ui/status-badge'
+import { repository } from '../../data/mock/mock-repository'
+import type { Contract } from '../../lib/types'
+import { formatCurrency, formatDate } from '../../lib/utils'
+
+export function ContractsPage() {
+  const [items, setItems] = useState<Contract[]>([]); const [query, setQuery] = useState(''); const [status, setStatus] = useState('all')
+  useEffect(() => { repository.listContracts().then(setItems) }, [])
+  const filtered = useMemo(() => items.filter((item) => (status === 'all' || item.status === status) && `${item.residentName} ${item.roomCode} ${item.contractCode}`.toLowerCase().includes(query.toLowerCase())), [items, query, status])
+  async function renew(item: Contract) { const date = new Date(item.endDate); date.setFullYear(date.getFullYear() + 1); const updated = await repository.renewContract(item.id, date.toISOString().slice(0, 10)); setItems((current) => current.map((row) => row.id === item.id ? updated : row)) }
+  return <><PageHeader title="Quản lý hợp đồng" description="Theo dõi thời hạn, phí phòng và gia hạn hợp đồng cư trú." actions={<Button><FileText size={16} /> Tạo hợp đồng</Button>} /><div className="kpi-grid compact-kpis"><Summary label="Tổng hợp đồng" value={items.length} /><Summary label="Đang hiệu lực" value={items.filter((item) => item.status === 'active').length} tone="success" /><Summary label="Sắp hết hạn" value={items.filter((item) => item.status === 'expiring').length} tone="warning" /><Summary label="Đã hết hạn" value={items.filter((item) => item.status === 'expired').length} tone="danger" /></div><div className="card"><div className="table-toolbar"><div className="toolbar-controls"><input className="field-control" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Tìm sinh viên, phòng, số hợp đồng..." aria-label="Tìm hợp đồng" /><select className="select-control" value={status} onChange={(event) => setStatus(event.target.value)} aria-label="Lọc trạng thái hợp đồng"><option value="all">Tất cả trạng thái</option><option value="active">Đang hiệu lực</option><option value="expiring">Sắp hết hạn</option><option value="expired">Đã hết hạn</option></select></div><span className="table-count">{filtered.length} hợp đồng</span></div><div className="table-wrap"><table className="data-table"><thead><tr><th>Hợp đồng</th><th>Sinh viên</th><th>Phòng</th><th>Thời hạn</th><th>Phí tháng</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>{filtered.map((item) => <tr key={item.id}><td className="cell-primary">{item.contractCode}</td><td>{item.residentName}</td><td>{item.building} · {item.roomCode}</td><td><div>{formatDate(item.startDate)}</div><div className="cell-secondary">đến {formatDate(item.endDate)}</div></td><td>{formatCurrency(item.monthlyFee)}</td><td><StatusBadge status={item.status} /></td><td><Button variant="secondary" size="sm" onClick={() => renew(item)}><RefreshCw size={14} /> Gia hạn</Button></td></tr>)}</tbody></table></div></div></>
+}
+function Summary({ label, value, tone = 'primary' }: { label: string; value: number; tone?: string }) { return <Card><CardContent className="summary-card"><span className={`kpi-icon ${tone}`}><FileText size={18} /></span><div><span className="kpi-label">{label}</span><strong className="summary-value">{value}</strong></div></CardContent></Card> }
