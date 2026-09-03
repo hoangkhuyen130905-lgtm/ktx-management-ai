@@ -1,3 +1,4 @@
+
 # Hệ thống quản lý ký túc xá
 
 Ứng dụng React + TypeScript + Vite. AI backend dùng Anthropic SDK, chỉ đọc dữ liệu phòng và nội quy KTX ICTU tham khảo.
@@ -31,3 +32,4 @@ npm run build
 npm run build:server
 curl -i http://127.0.0.1:8787/health
 ```
+
