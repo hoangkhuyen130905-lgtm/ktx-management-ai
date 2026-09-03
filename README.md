@@ -1,4 +1,19 @@
+## 🌐 Demo
 
+- **Web Demo:** https://ktx-management-ai.vercel.app/
+- **Backend API:** https://ktx-management-ai.onrender.com
+- **GitHub:** https://github.com/hoangkhuyen130905-lgtm/ktx-management-ai
+
+### 🤖 AI Demo
+
+Hệ thống tích hợp trợ lý AI hỗ trợ:
+- Tìm kiếm phòng còn chỗ.
+- Tra cứu tình trạng phòng.
+- Tóm tắt thông tin ký túc xá.
+- Trả lời các câu hỏi vận hành bằng tiếng Việt.
+- Sử dụng dữ liệu phòng hiện tại thông qua AI Tool.
+
+> AI Backend được triển khai trên Render và Frontend được triển khai trên Vercel.
 # Hệ thống quản lý ký túc xá
 
 Ứng dụng React + TypeScript + Vite. AI backend dùng Anthropic SDK, chỉ đọc dữ liệu phòng và nội quy KTX ICTU tham khảo.
