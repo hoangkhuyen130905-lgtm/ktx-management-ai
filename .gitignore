@@ -25,3 +25,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+.claude/
+.codegraph/
+KTX-Management-AI-Nhom15.zip
+dist-server/
