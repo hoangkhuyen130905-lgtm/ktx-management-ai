@@ -1,6 +1,22 @@
 import { createServer } from 'node:http'
-import { chatWithDormitoryAssistant } from './ai.ts'
+import { readFileSync } from 'node:fs'
+import { loadEnvFile } from 'node:process'
 
+function loadProjectEnv() {
+  try { loadEnvFile('.env') } catch { /* .env is optional in deployed environments. */ }
+  try {
+    const envText = readFileSync('.env', 'utf8')
+    for (const line of envText.split(/\\r?\\n/)) {
+      const match = line.match(/^\\s*([A-Z_][A-Z0-9_]*)\\s*=\\s*(.*)\\s*$/)
+      if (!match || match[1].startsWith('#')) continue
+      const value = match[2].replace(/^['\"]|['\"]$/g, '')
+      process.env[match[1]] = value
+    }
+  } catch { /* .env is optional in deployed environments. */ }
+}
+
+loadProjectEnv()
+const { chatWithDormitoryAssistant } = await import('./ai.ts')
 const port = Number(process.env.PORT ?? process.env.AI_PORT ?? 8787)
 const maxBodySize = 32_000
 
