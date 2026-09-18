@@ -5,7 +5,10 @@ import { lookupRooms } from './rooms-repository.ts'
 import { SYSTEM_PROMPT } from './prompts.ts'
 
 const model = process.env.AI_MODEL ?? process.env.ANTHROPIC_DEFAULT_OPUS_MODEL ?? 'claude-opus-5'
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+const client = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+  baseURL: process.env.ANTHROPIC_BASE_URL,
+})
 
 export type AiSource = { id: string; label: string; version?: string; status?: 'demo' | 'draft' | 'approved'; effectiveDate?: string | null }
 
